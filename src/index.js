@@ -51,6 +51,7 @@ class Game extends React.Component {
     }
 
     handleClick(i) {
+        console.log('clicked')
         const history = this.state.history.slice(0, this.state.stepNumber + 1);
         const current = history[this.state.stepNumber];
         const squares = current.squares.slice();
@@ -67,10 +68,10 @@ class Game extends React.Component {
         });
     }
 
-    jumpTo(step) {
+    jumpTo(step, move) {
         this.setState({
-            stepNumber: step,
-            xIsNext: (step % 2) === 0
+            stepNumber: move,
+            xIsNext: (move % 2) === 0
         })
     }
 
@@ -79,16 +80,37 @@ class Game extends React.Component {
         const current = history[history.length - 1];
         const winner = calculateWinner(current.squares);
 
-        const moves = history.map((step, move) => {
+        const moves = []
+        history.forEach((step, move) => {
+            let location;
+            step.squares.forEach((sq, index) => {
+                let thisSq = sq ? sq : '';
+                let prevSq = move > 1 ? history[move - 1].squares[index] : null
+                prevSq = prevSq ? prevSq : '';
+                if (thisSq !== prevSq) {
+                    location = index;
+                }
+            })
             const desc = move ?
-                'Go to move #' + move :
+                'move #' + move + ': row=' + parseInt(location / 3) + " col=" + location % 3:
                 'Go to game start';
-            return (
+            moves.push (
                 <li key = {desc}>
-                    <button onClick={() => this.jumpTo(move)}>{desc}</button>
+                    <button onClick={() => this.jumpTo(step, move)}>{desc}</button>
                 </li>
             );
-        });
+        })
+
+        // const moves1 = history.map((step, move) => {
+        //     const desc = move ?
+        //         'move #' + move + ': row=' + parseInt(move / 3) + " col=" + move % 3:
+        //         'Go to game start';
+        //     return (
+        //         <li key = {desc}>
+        //             <button onClick={() => this.jumpTo(step, move)}>{desc}</button>
+        //         </li>
+        //     );
+        // });
 
         let status;
         if (winner) {
